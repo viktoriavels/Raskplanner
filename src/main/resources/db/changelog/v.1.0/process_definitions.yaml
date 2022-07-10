@@ -1,0 +1,45 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 7
+      author: vels
+      changes:
+        - createTable:
+            tableName: process_definitions
+            columns:
+              - column:
+                  name: id
+                  type: varchar(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(256)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: nvarchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: definition_plan
+                  type: nvarchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: owner_username
+                  type: varchar(256)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deleted
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: templated
+                  type: boolean
+                  constraints:
+                    nullable: false

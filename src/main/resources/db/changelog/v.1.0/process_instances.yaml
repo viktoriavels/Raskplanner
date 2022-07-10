@@ -1,0 +1,34 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 6
+      author: vels
+      changes:
+        - createTable:
+            tableName: process_instances
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: definition_id
+                  type: varchar(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: owner
+                  type: varchar(256)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: creation_date
+                  type: datetime
+              - column:
+                  name: due_date
+                  type: datetime
+              - column:
+                  name: completion_date
+                  type: datetime

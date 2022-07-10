@@ -1,0 +1,49 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 5
+      author: vels
+      changes:
+        - createTable:
+            tableName: task_instances
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: process_instance_id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    foreingkey: true
+                    nullable: false
+                    foreignKeyName: task_instances_process_instance_id_fkey
+                    references:     process_instances(id)
+              - column:
+                  name: definition_id
+                  type: varchar(36)
+                  constraints:
+                    foreingkey: true
+                    nullable: false
+              - column:
+                  name: creation_date
+                  type: datetime
+              - column:
+                  name: due_date
+                  type: datetime
+              - column:
+                  name: completion_date
+                  type: datetime
+              - column:
+                  name: title
+                  type: varchar(512)
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: decisition
+                  type: varchar(255)

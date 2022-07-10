@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: vels
+      changes:
+      - createTable:
+          tableName: task_instance_candidates
+          columns:
+           - column:
+              name: id
+              type: bigint
+              autoIncrement: true
+              constraints:
+                primaryKey: true
+                nullable: false
+           - column:
+              name: task_instance_id
+              type: bigint
+              autoIncrement: true
+              constraints:
+                foreingkey: true
+                nullable: false
+                foreignKeyName: ask_instance_candidates_task_instance_id_fkey
+                references: task_instances(id)
+           - column:
+              name: authority_name
+              type: varchar(256)
+              constraints:
+                foreingkey: true
+                nullable: false

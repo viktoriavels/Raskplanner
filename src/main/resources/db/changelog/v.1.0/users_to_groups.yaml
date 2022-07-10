@@ -1,0 +1,27 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 3
+      author: vels
+      changes:
+        - createTable:
+            tableName: users_to_groups
+            columns:
+              - column:
+                  name: username
+                  type: varchar(256)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreingkey: true
+                    foreignKeyName: user_to_groups_username_fkey
+                    references: users(username)
+              - column:
+                  name: group_id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreingkey: true
+                    foreignKeyName: user_to_groups_group_id_fkey
+                    references: groups(id)

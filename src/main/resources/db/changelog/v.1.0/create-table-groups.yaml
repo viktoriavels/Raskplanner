@@ -1,0 +1,31 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 2
+      author: vels
+      changes:
+      - createTable:
+          tableName: groups
+          columns:
+            - column:
+                name: id
+                type: bigint
+                autoIncrement: true
+                constraints:
+                  primaryKey: true
+                  nullable: false
+            - column:
+                name: name
+                type: varchar(256)
+            - column:
+                name: title
+                type: varchar(256)
+            - column:
+                name: deleted
+                type: boolean
+            - column:
+                name: owner
+                type: varchar(256)
+                constraints:
+                  foreignKeyName: group_owner_fkey
+                  references: users(username)

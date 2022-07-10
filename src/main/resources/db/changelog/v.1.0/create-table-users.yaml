@@ -1,0 +1,32 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 1
+      author: vels
+      changes:
+      - createTable:
+          tableName: users
+          columns:
+            - column:
+                name: username
+                type: varchar(256)
+                constraints:
+                  primaryKey: true
+                  nullable: false
+            - column:
+                name: last_name
+                type: varchar(256)
+            - column:
+                name: first_name
+                type: varchar(256)
+            - column:
+                name: patronymic
+                type: varchar(256)
+                constraints:
+                  nullable: false
+            - column:
+                name: secret
+                type: varchar(256)
+            - column:
+                name: deleted
+                type: boolean

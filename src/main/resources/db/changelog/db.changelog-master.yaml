@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/v.1.0/create-table-users.yaml
+  - include:
+      file: db/changelog/v.1.0/create-table-groups.yaml
+  - include:
+      file: db/changelog/v.1.0/process_definitions.yaml
+  - include:
+      file: db/changelog/v.1.0/process_instances.yaml
+  - include:
+      file: db/changelog/v.1.0/task_instances.yaml
+  - include:
+      file: db/changelog/v.1.0/create-task-instance-candidates.yaml
+  - include:
+      file: db/changelog/v.1.0/users_to_groups.yaml
