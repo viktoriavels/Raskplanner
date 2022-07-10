@@ -7,7 +7,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "groups")
-
 public class Group {
     public Group() {
 

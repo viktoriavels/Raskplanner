@@ -1,7 +1,6 @@
 
 package ru.vels.taskplanner.entity;
 
-import org.springframework.context.annotation.EnableMBeanExport;
 
 import javax.persistence.*;
 
