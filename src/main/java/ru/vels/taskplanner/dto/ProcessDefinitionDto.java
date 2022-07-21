@@ -1,34 +1,21 @@
+package ru.vels.taskplanner.dto;
 
-package ru.vels.taskplanner.entity;
+import ru.vels.taskplanner.entity.User;
 
 
-import javax.persistence.*;
 
-@Entity
-@Table(name = "process_definitions")
-public class ProcessDefinition {
-    public ProcessDefinition() {
-    }
+public class ProcessDefinitionDto {
 
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
 
-    @Column(name = "title")
     private String title;
 
-    @Column(name = "description")
     private String description;
 
-    @Column(name = "definition_plan")
     private String definitionPlan;
 
-    @ManyToOne
-    @JoinColumn(name = "owner")
     private User owner;
 
-    @Column(name = "deleted")
     private boolean deleted;
 
     public String getId() {
@@ -79,4 +66,3 @@ public class ProcessDefinition {
         this.deleted = deleted;
     }
 }
-

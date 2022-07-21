@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "Process_instance")
+@Table(name = "process_instance")
 public class ProcessInstance {
     public ProcessInstance() {
     }

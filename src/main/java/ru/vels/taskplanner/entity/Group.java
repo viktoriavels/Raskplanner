@@ -1,6 +1,6 @@
 package ru.vels.taskplanner.entity;
 
-import liquibase.pro.packaged.J;
+
 
 import javax.persistence.*;
 import java.util.List;

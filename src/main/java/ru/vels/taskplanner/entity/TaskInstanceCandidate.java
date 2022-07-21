@@ -3,7 +3,7 @@ package ru.vels.taskplanner.entity;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "Task_instance_candidate")
+@Table(name = "task_instance_candidate")
 public class TaskInstanceCandidate {
     public TaskInstanceCandidate() {
     }

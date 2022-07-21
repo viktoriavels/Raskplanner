@@ -4,16 +4,10 @@ import java.util.List;
 
 public class GroupDto {
     private Long id;
-
     private String name;
-
     private String title;
-
     private String owner;
-
     private Boolean deleted;
-
-
     private List<UserDto> users;
 
     public Long getId() {
