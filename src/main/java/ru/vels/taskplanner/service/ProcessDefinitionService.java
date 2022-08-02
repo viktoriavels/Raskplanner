@@ -9,24 +9,34 @@ import ru.vels.taskplanner.dto.ProcessDefinitionFilter;
 import ru.vels.taskplanner.entity.ProcessDefinition;
 import ru.vels.taskplanner.exception.DeprivedOfRightsException;
 import ru.vels.taskplanner.exception.DuplicateException;
+import ru.vels.taskplanner.exception.NotFoundException;
 import ru.vels.taskplanner.repo.ProcessDefinitionRepository;
 
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 @Component
 public class ProcessDefinitionService {
+
     @Autowired
     ProcessDefinitionRepository processDefinitionRepository;
 
     public ProcessDefinitionDto getProcessDefinitionInfo(String guid) {
-        ProcessDefinition processDefinition = processDefinitionRepository.findByTitle(guid);
+        Optional<ProcessDefinition> byId = processDefinitionRepository.findById(guid);
+        if (byId.isPresent()) {
+            throw new NotFoundException("not found");
+        }
+        ProcessDefinition processDefinition = byId.get();
         ProcessDefinitionDto processDefinitionDto = convertProcessDefinition(processDefinition);
         return processDefinitionDto;
     }
 
     private ProcessDefinitionDto convertProcessDefinition(ProcessDefinition processDefinition) {
         ProcessDefinitionDto processDefinitionDto = new ProcessDefinitionDto();
+        processDefinitionDto.setId(processDefinition.getId());
         processDefinitionDto.setDefinitionPlan(processDefinition.getDefinitionPlan());
         processDefinitionDto.setDescription(processDefinition.getDescription());
         processDefinitionDto.setOwner(processDefinition.getOwner());
@@ -40,9 +50,6 @@ public class ProcessDefinitionService {
             @Override
             public Predicate toPredicate(Root<ProcessDefinition> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
                 List<Predicate> predicates = new ArrayList<>();
-                if (filter.getDefinitionPlan() != null) {
-                    predicates.add(criteriaBuilder.equal(root.get("definitionPlan"), filter.getDefinitionPlan()));
-                }
                 if (filter.getOwner() != null) {
                     predicates.add(criteriaBuilder.equal(root.get("owner"), filter.getOwner()));
                 }
@@ -64,10 +71,15 @@ public class ProcessDefinitionService {
     }
 
     public ProcessDefinitionDto createProcessDefinition(ProcessDefinitionDto processDefinitionDto) throws DuplicateException {
-        if (processDefinitionRepository.findByTitle(processDefinitionDto.getTitle()) != null) {
-            throw new DuplicateException("Duplicate title");
-        }
         ProcessDefinition processDefinition = new ProcessDefinition();
+        if (processDefinitionDto.getId() == null) {
+            processDefinition.setId(UUID.randomUUID().toString());
+        } else {
+            if (processDefinitionRepository.existsById(processDefinitionDto.getId())) {
+                throw new DuplicateException("Duplicate title");
+            }
+            processDefinition.setId(processDefinitionDto.getId());
+        }
         processDefinition.setDefinitionPlan(processDefinitionDto.getDefinitionPlan());
         processDefinition.setDeleted(false);
         processDefinition.setDescription(processDefinitionDto.getDescription());
@@ -75,24 +87,19 @@ public class ProcessDefinitionService {
         processDefinition.setTitle(processDefinitionDto.getTitle());
 
         processDefinition = processDefinitionRepository.save(processDefinition);
-        ProcessDefinitionDto processDefinitionDto1 = new ProcessDefinitionDto();
-        processDefinitionDto1.setDefinitionPlan(processDefinition.getDefinitionPlan());
-        processDefinitionDto1.setDeleted(false);
-        processDefinitionDto1.setDescription(processDefinition.getDescription());
-        processDefinitionDto1.setOwner(processDefinition.getOwner());
-        processDefinitionDto1.setTitle(processDefinition.getTitle());
-
-        return processDefinitionDto1;
-
+        return convertProcessDefinition(processDefinition);
     }
 
     public void removeProcessDefinition(String guid) throws DeprivedOfRightsException {
-        ProcessDefinition processDefinition = processDefinitionRepository.findByTitle(guid);
-
+        Optional<ProcessDefinition> byId = processDefinitionRepository.findById(guid);
+        if (byId.isPresent()) {
+            throw new NotFoundException("not found");
+        }
+        ProcessDefinition processDefinition = byId.get();
         org.springframework.security.core.userdetails.User currentUser
                 = (org.springframework.security.core.userdetails.User)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (currentUser.getUsername().equals(processDefinition.getOwner().getUsername())) {
+        if (currentUser.getUsername().equals(processDefinition.getOwner())) {
             processDefinition.setDeleted(true);
             processDefinitionRepository.save(processDefinition);
         } else {

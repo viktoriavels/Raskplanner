@@ -1,41 +1,20 @@
-package ru.vels.taskplanner.entity;
+package ru.vels.taskplanner.dto;
 
-import javax.persistence.*;
 import java.time.Instant;
 import java.util.List;
 
-@Entity
-@Table(name = "task_instances")
-public class TaskInstance {
+public class TaskInstanceDto {
 
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-    @Column(name = "definition_id")
     private String taskDefinitionId;
-    @ManyToOne
-    @JoinColumn(name = "process_instance_id")
-    private ProcessInstance processInstance;
-    @ElementCollection
-    @CollectionTable(name = "task_instance_candidates", joinColumns = @JoinColumn(name = "task_instance_id"))
-    @Column(name = "candidates")
+    private Long processInstanceId;
     private List<String> candidates;
-    @Column(name = "creation_date")
     private Instant creationDate;
-    @Column(name = "dueDate")
     private Instant dueDate;
-    @Column(name = "completion_date")
     private Instant completionDate;
-    @Column(name = "title")
     private String title;
-    @Column(name = "description")
     private String description;
-    @Column(name = "decision")
     private String decision;
-
-    public TaskInstance() {
-    }
 
     public long getId() {
         return id;
@@ -45,12 +24,20 @@ public class TaskInstance {
         this.id = id;
     }
 
-    public ProcessInstance getProcessInstance() {
-        return processInstance;
+    public String getTaskDefinitionId() {
+        return taskDefinitionId;
     }
 
-    public void setProcessInstance(ProcessInstance processInstance) {
-        this.processInstance = processInstance;
+    public void setTaskDefinitionId(String taskDefinitionId) {
+        this.taskDefinitionId = taskDefinitionId;
+    }
+
+    public Long getProcessInstanceId() {
+        return processInstanceId;
+    }
+
+    public void setProcessInstanceId(Long processInstanceId) {
+        this.processInstanceId = processInstanceId;
     }
 
     public List<String> getCandidates() {
@@ -107,13 +94,5 @@ public class TaskInstance {
 
     public void setDecision(String decision) {
         this.decision = decision;
-    }
-
-    public String getTaskDefinitionId() {
-        return taskDefinitionId;
-    }
-
-    public void setTaskDefinitionId(String taskDefinitionId) {
-        this.taskDefinitionId = taskDefinitionId;
     }
 }

@@ -1,35 +1,27 @@
-
 package ru.vels.taskplanner.entity;
-
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "process_definitions")
 public class ProcessDefinition {
-    public ProcessDefinition() {
-    }
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
-
     @Column(name = "title")
     private String title;
-
     @Column(name = "description")
     private String description;
-
     @Column(name = "definition_plan")
     private String definitionPlan;
-
-    @ManyToOne
-    @JoinColumn(name = "owner")
-    private User owner;
-
+    @Column(name = "owner_username")
+    private String owner;
     @Column(name = "deleted")
     private boolean deleted;
+
+    public ProcessDefinition() {
+    }
 
     public String getId() {
         return id;
@@ -63,11 +55,11 @@ public class ProcessDefinition {
         this.definitionPlan = definitionPlan;
     }
 
-    public User getOwner() {
+    public String getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
 

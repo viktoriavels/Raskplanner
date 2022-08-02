@@ -1,17 +1,10 @@
 package ru.vels.taskplanner.dto;
 
-import ru.vels.taskplanner.entity.User;
-
 public class ProcessDefinitionFilter {
 
     private String title;
-
     private String description;
-
-    private String definitionPlan;
-
-    private User owner;
-
+    private String owner;
 
     public String getTitle() {
         return title;
@@ -29,22 +22,11 @@ public class ProcessDefinitionFilter {
         this.description = description;
     }
 
-    public String getDefinitionPlan() {
-        return definitionPlan;
-    }
-
-    public void setDefinitionPlan(String definitionPlan) {
-        this.definitionPlan = definitionPlan;
-    }
-
-    public User getOwner() {
+    public String getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
-
-
-
 }

@@ -1,16 +1,11 @@
 package ru.vels.taskplanner.entity;
 
-import liquibase.pro.packaged.S;
-
 import javax.persistence.*;
 import java.util.List;
-
 
 @Entity
 @Table(name = "users")
 public class User {
-    public User() {
-    }
 
     @Id
     @Column(name = "username")
@@ -31,6 +26,9 @@ public class User {
             joinColumns = @JoinColumn(name = "username"),
             inverseJoinColumns = @JoinColumn(name = "group_id"))
     private List<Group> groups;
+
+    public User() {
+    }
 
     public String getUsername() {
         return username;

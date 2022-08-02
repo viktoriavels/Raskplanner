@@ -1,36 +1,33 @@
 package ru.vels.taskplanner.entity;
 
-
-
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
 @Table(name = "groups")
 public class Group {
-    public Group() {
-
-    }
 
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
+    @Column(name= "name")
     private String name;
-
+    @Column(name = "title")
     private String title;
-
+    @Column(name = "owner")
     private String owner;
-
+    @Column(name = "deleted")
     private Boolean deleted;
-
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "users_to_groups",
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "username"))
     @JoinColumn(name = "username")
     private List<User> users;
+
+    public Group() {
+    }
 
     public Long getId() {
         return id;

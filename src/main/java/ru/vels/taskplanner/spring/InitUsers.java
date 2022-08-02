@@ -13,16 +13,16 @@ import ru.vels.taskplanner.repo.UsersRepository;
 
 import java.util.ArrayList;
 
-
 @Component
 public class InitUsers {
+
     private volatile boolean initialized;
     @Autowired
-    private UsersRepository usersRepository;
+    UsersRepository usersRepository;
     @Autowired
-    private GroupsRepository groupsRepository;
+    GroupsRepository groupsRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder;
 
     @EventListener
     @Transactional

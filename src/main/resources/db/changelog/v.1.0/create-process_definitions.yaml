@@ -38,8 +38,3 @@ databaseChangeLog:
                   type: boolean
                   constraints:
                     nullable: false
-              - column:
-                  name: templated
-                  type: boolean
-                  constraints:
-                    nullable: false

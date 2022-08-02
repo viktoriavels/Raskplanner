@@ -1,6 +1,6 @@
 package ru.vels.taskplanner.service;
 
-import liquibase.pro.packaged.G;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,19 +18,19 @@ import ru.vels.taskplanner.exception.DuplicateException;
 import ru.vels.taskplanner.repo.GroupsRepository;
 import ru.vels.taskplanner.repo.UsersRepository;
 
-import javax.jws.soap.SOAPBinding;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class AuthService {
+
     @Autowired
-    private UsersRepository usersRepository;
+    UsersRepository usersRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder;
     @Autowired
-    private GroupsRepository groupsRepository;
+    GroupsRepository groupsRepository;
 
     public UserDto addUser(UserDto userDto) throws DuplicateException {
         if (usersRepository.findByUsername(userDto.getUsername()) != null) {
@@ -44,13 +44,7 @@ public class AuthService {
         user.setFirstName(userDto.getFirstName());
         user.setSecret(passwordEncoder.encode(userDto.getSecret()));
         user = usersRepository.save(user);
-        UserDto userDto1 = new UserDto();
-        userDto1.setUsername(user.getUsername());
-        userDto1.setFirstName(user.getFirstName());
-        userDto1.setDeleted(false);
-        userDto1.setPatronymic(user.getPatronymic());
-        userDto1.setLastName(user.getLastName());
-        return userDto1;
+        return convertUser(user);
     }
 
     public GroupDto createGroup(GroupDto groupDto) throws DuplicateException {
@@ -67,13 +61,7 @@ public class AuthService {
         group.setOwner(currentUser.getUsername());
 
         group = groupsRepository.save(group);
-        GroupDto groupDto1 = new GroupDto();
-        groupDto1.setName(group.getName());
-        groupDto1.setTitle(group.getTitle());
-        groupDto1.setDeleted(false);
-        groupDto1.setOwner(group.getOwner());
-
-        return groupDto1;
+        return convertGroup(group);
     }
 
     public void removeUser(String username) throws DeprivedOfRightsException {
@@ -105,17 +93,6 @@ public class AuthService {
         }
     }
 
-    private boolean isAdmin() {
-        org.springframework.security.core.userdetails.User currentUser
-                = (org.springframework.security.core.userdetails.User)
-                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        for (GrantedAuthority authority : currentUser.getAuthorities()) {
-            if (authority.getAuthority().equals("ROLE_ADMINS")) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     public UserDto getUserInfo(String username) {
         User user = usersRepository.findByUsername(username);
@@ -129,46 +106,6 @@ public class AuthService {
         return groupDto;
     }
 
-    private GroupDto convertGroup(Group group) {
-        GroupDto groupDto = new GroupDto();
-        groupDto.setName(group.getName());
-        groupDto.setOwner(group.getOwner());
-        groupDto.setTitle(group.getTitle());
-        groupDto.setDeleted(group.getDeleted());
-        ArrayList<UserDto> users = new ArrayList<>();
-        for (User g : group.getUsers()) {
-            UserDto userDto = new UserDto();
-            userDto.setUsername(g.getUsername());
-            userDto.setPatronymic(g.getPatronymic());
-            userDto.setFirstName(g.getFirstName());
-            userDto.setLastName(g.getLastName());
-            userDto.setDeleted(g.getDeleted());
-            users.add(userDto);
-        }
-        groupDto.setUsers(users);
-        return groupDto;
-    }
-
-    private UserDto convertUser(User user) {
-        UserDto userDto = new UserDto();
-        userDto.setUsername(user.getUsername());
-        userDto.setLastName(user.getLastName());
-        userDto.setFirstName(user.getFirstName());
-        userDto.setPatronymic(user.getPatronymic());
-
-        ArrayList<GroupDto> group = new ArrayList<>();
-
-        for (Group g : user.getGroups()) {
-            GroupDto groupDto = new GroupDto();
-            groupDto.setName(g.getName());
-            groupDto.setOwner(g.getOwner());
-            groupDto.setTitle(g.getTitle());
-            groupDto.setDeleted(g.getDeleted());
-            group.add(groupDto);
-        }
-        userDto.setGroups(group);
-        return userDto;
-    }
 
     public UserDto updateUserDto(UserDto userDto) throws DeprivedOfRightsException {
         User user = usersRepository.findByUsername(userDto.getUsername());
@@ -197,7 +134,7 @@ public class AuthService {
         org.springframework.security.core.userdetails.User currentUser
                 = (org.springframework.security.core.userdetails.User)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (groupDto.getOwner().equals(currentUser.getUsername()) || isAdmin()) {
+        if (group.getOwner().equals(currentUser.getUsername()) || isAdmin()) {
             group.setName(groupDto.getName());
             group.setTitle(groupDto.getTitle());
             group = groupsRepository.save(group);
@@ -207,7 +144,6 @@ public class AuthService {
             groupDto1.setDeleted(false);
 
             return groupDto1;
-
         }
         throw new DeprivedOfRightsException("Нет прав для обновления группы");
     }
@@ -251,7 +187,7 @@ public class AuthService {
                 if (groupFilter.getOwner() != null) {
                     predicates.add(criteriaBuilder.equal(root.get("owner"), groupFilter.getOwner()));
                 }
-                if (groupFilter.getTitle()!= null) {
+                if (groupFilter.getTitle() != null) {
                     predicates.add(criteriaBuilder.equal(root.get("title"), groupFilter.getTitle()));
                 }
                 return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
@@ -293,5 +229,61 @@ public class AuthService {
         } else {
             throw new DeprivedOfRightsException("Нет прав для удаления пользователя");
         }
+    }
+
+    private GroupDto convertGroup(Group group) {
+        GroupDto groupDto = new GroupDto();
+        groupDto.setName(group.getName());
+        groupDto.setOwner(group.getOwner());
+        groupDto.setTitle(group.getTitle());
+        groupDto.setDeleted(group.getDeleted());
+        groupDto.setId(group.getId());
+        ArrayList<UserDto> users = new ArrayList<>();
+        for (User g : group.getUsers()) {
+            UserDto userDto = new UserDto();
+            userDto.setUsername(g.getUsername());
+            userDto.setPatronymic(g.getPatronymic());
+            userDto.setFirstName(g.getFirstName());
+            userDto.setLastName(g.getLastName());
+            userDto.setDeleted(g.getDeleted());
+            users.add(userDto);
+        }
+        groupDto.setUsers(users);
+        return groupDto;
+    }
+
+    private UserDto convertUser(User user) {
+        UserDto userDto = new UserDto();
+        userDto.setUsername(user.getUsername());
+        userDto.setLastName(user.getLastName());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setPatronymic(user.getPatronymic());
+        userDto.setDeleted(user.getDeleted());
+
+        ArrayList<GroupDto> group = new ArrayList<>();
+
+        for (Group g : user.getGroups()) {
+            GroupDto groupDto = new GroupDto();
+            groupDto.setName(g.getName());
+            groupDto.setOwner(g.getOwner());
+            groupDto.setTitle(g.getTitle());
+            groupDto.setDeleted(g.getDeleted());
+            groupDto.setId(g.getId());
+            group.add(groupDto);
+        }
+        userDto.setGroups(group);
+        return userDto;
+    }
+
+    private boolean isAdmin() {
+        org.springframework.security.core.userdetails.User currentUser
+                = (org.springframework.security.core.userdetails.User)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        for (GrantedAuthority authority : currentUser.getAuthorities()) {
+            if (authority.getAuthority().equals("ROLE_ADMINS")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

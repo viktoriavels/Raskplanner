@@ -30,38 +30,41 @@ public class GroupController {
     }
 
     @PutMapping("/group/{groupName}/user/{username}")
-
     public void addUserToGroup(@PathVariable String username, @PathVariable String groupName) throws DeprivedOfRightsException {
         authService.addUserToGroup(username, groupName);
     }
+
     @PostMapping(path = "/group/search",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ArrayList<GroupDto> searchGroup(@RequestBody GroupFilter filter) throws DuplicateException {
+    public ArrayList<GroupDto> searchGroup(@RequestBody GroupFilter filter) {
         return authService.searchGroup(filter);
     }
 
     @DeleteMapping("/group/{groupName}/user/{username}")
-    public void removeUserFromGroup(@PathVariable String username,@PathVariable String groupName) throws DeprivedOfRightsException {
+    public void removeUserFromGroup(@PathVariable String username, @PathVariable String groupName) throws DeprivedOfRightsException {
         authService.removeUserFromGroup(username, groupName);
     }
+
     @GetMapping(path = "/group/{groupName}", produces = "application/json")
-    public GroupDto getGroupInfo(@RequestBody String name) {
+    public GroupDto getGroupInfo(@PathVariable String name) {
         return authService.getGroupInfo(name);
     }
+
     @PatchMapping(path = "/group/",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public GroupDto updateGroup(@RequestBody GroupDto updateGroupDto) throws DuplicateException, DeprivedOfRightsException {
+    public GroupDto updateGroup(@RequestBody GroupDto updateGroupDto) throws DeprivedOfRightsException {
         return authService.updateGroupDto(updateGroupDto);
     }
+
     @ExceptionHandler(DeprivedOfRightsException.class)
-    public ResponseEntity handleException(DeprivedOfRightsException e) {
-        return new ResponseEntity(HttpStatus.FORBIDDEN);
+    public ResponseEntity<Void> handleException(DeprivedOfRightsException e) {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity handleException(DuplicateException e) {
-        return new ResponseEntity(HttpStatus.CONFLICT);
+    public ResponseEntity<Void> handleException(DuplicateException e) {
+        return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 }

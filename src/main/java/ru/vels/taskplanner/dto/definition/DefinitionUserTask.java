@@ -3,11 +3,11 @@ package ru.vels.taskplanner.dto.definition;
 import java.time.Duration;
 import java.util.List;
 
-public class DefinitionUserTask extends DefinitionActivity{
-    private  String title;
-    private  String description;
-    private List<String>  candidates;
-    private List<String>availableDecisions;
+public class DefinitionUserTask extends DefinitionActivity {
+    private String title;
+    private String description;
+    private List<String> candidates;
+    private List<String> availableDecisions;
     private Duration dueDateInterval;
 
     public String getTitle() {

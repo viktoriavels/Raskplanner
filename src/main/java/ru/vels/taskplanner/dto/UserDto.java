@@ -4,19 +4,12 @@ import java.util.List;
 
 public class UserDto {
 
-
     private String username;
-
     private String lastName;
-
     private String firstName;
-
     private String patronymic;
-
     private String secret;
-
     private Boolean deleted;
-
     private List<GroupDto> groups;
 
     public String getUsername() {

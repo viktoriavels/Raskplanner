@@ -2,32 +2,39 @@ package ru.vels.taskplanner.entity;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.List;
 
 @Entity
-@Table(name = "process_instance")
+@Table(name = "process_instances")
 public class ProcessInstance {
-    public ProcessInstance() {
-    }
 
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-
-
-    @ManyToOne
-    @JoinColumn(name = "process_definition_id")
-    private ProcessDefinition definition;
-
-    @ManyToOne
-    @JoinColumn(name = "owner")
-    User owner;
+    @Column(name = "definition_id")
+    private String definition;
+    @Column(name = "owner")
+    private String owner;
     @Column(name = "creation_date")
-    Instant creationDate;
+    private   Instant creationDate;
     @Column(name = "due_date")
-    Instant dueDate;
+    private  Instant dueDate;
     @Column(name = "completion_date")
-    Instant completionDate;
+    private   Instant completionDate;
+    @OneToMany(mappedBy = "processInstance")
+    private List<TaskInstance> taskInstanceList;
+
+    public ProcessInstance() {
+    }
+
+    public List<TaskInstance> getTaskInstanceList() {
+        return taskInstanceList;
+    }
+
+    public void setTaskInstanceList(List<TaskInstance> taskInstanceList) {
+        this.taskInstanceList = taskInstanceList;
+    }
 
     public long getId() {
         return id;
@@ -37,19 +44,19 @@ public class ProcessInstance {
         this.id = id;
     }
 
-    public ProcessDefinition getDefinition() {
+    public String getDefinition() {
         return definition;
     }
 
-    public void setDefinition(ProcessDefinition definition) {
+    public void setDefinition(String definition) {
         this.definition = definition;
     }
 
-    public User getOwner() {
+    public String getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
 

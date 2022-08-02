@@ -1,15 +1,10 @@
 package ru.vels.taskplanner.dto;
 
-
-
 public class UserFilter {
 
     private String lastName;
-
     private String firstName;
-
     private String patronymic;
-
     private String group;
 
     public String getLastName() {

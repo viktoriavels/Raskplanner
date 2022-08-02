@@ -1,4 +1,4 @@
-package ru.vels.taskplanner.service;
+package ru.vels.taskplanner.spring;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,7 +17,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class UsersDetailServiceInd implements UserDetailsService {
+public class UsersDetailsServiceImpl implements UserDetailsService {
 
     private final UsersRepository userDao;
 
@@ -25,6 +25,9 @@ public class UsersDetailServiceInd implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userDao.findByUsername(username);
+        if(userDao.findByUsername(username)==null|| userDao.findByUsername(username).getDeleted().equals(true)){
+            throw  new UsernameNotFoundException("not found User or isDeleted");
+        }
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         for (Group group : user.getGroups()) {
             grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + group.getName()));
