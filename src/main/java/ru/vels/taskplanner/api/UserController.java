@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.vels.taskplanner.dto.UserDto;
 import ru.vels.taskplanner.dto.UserFilter;
 import ru.vels.taskplanner.exception.DeprivedOfRightsException;
-import ru.vels.taskplanner.exception.DuplicateException;
+import ru.vels.taskplanner.exception.ConflictException;
 import ru.vels.taskplanner.service.AuthService;
 
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class UserController {
     @PostMapping(path = "/user/register",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public UserDto createUser(@RequestBody UserDto newUser) throws DuplicateException {
+    public UserDto createUser(@RequestBody UserDto newUser) throws ConflictException {
         return authService.addUser(newUser);
     }
 
@@ -56,8 +56,8 @@ public class UserController {
         return new ResponseEntity(HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity handleException(DuplicateException e) {
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity handleException(ConflictException e) {
         return new ResponseEntity(HttpStatus.CONFLICT);
     }
 }

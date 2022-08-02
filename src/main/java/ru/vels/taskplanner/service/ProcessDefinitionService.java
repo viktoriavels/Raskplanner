@@ -4,11 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.vels.taskplanner.dto.ProcessDefinitionDto;
 import ru.vels.taskplanner.dto.ProcessDefinitionFilter;
 import ru.vels.taskplanner.entity.ProcessDefinition;
 import ru.vels.taskplanner.exception.DeprivedOfRightsException;
-import ru.vels.taskplanner.exception.DuplicateException;
+import ru.vels.taskplanner.exception.ConflictException;
 import ru.vels.taskplanner.exception.NotFoundException;
 import ru.vels.taskplanner.repo.ProcessDefinitionRepository;
 
@@ -24,14 +25,14 @@ public class ProcessDefinitionService {
     @Autowired
     ProcessDefinitionRepository processDefinitionRepository;
 
+    @Transactional
     public ProcessDefinitionDto getProcessDefinitionInfo(String guid) {
         Optional<ProcessDefinition> byId = processDefinitionRepository.findById(guid);
-        if (byId.isPresent()) {
+        if (!byId.isPresent()) {
             throw new NotFoundException("not found");
         }
         ProcessDefinition processDefinition = byId.get();
-        ProcessDefinitionDto processDefinitionDto = convertProcessDefinition(processDefinition);
-        return processDefinitionDto;
+        return convertProcessDefinition(processDefinition);
     }
 
     private ProcessDefinitionDto convertProcessDefinition(ProcessDefinition processDefinition) {
@@ -41,10 +42,11 @@ public class ProcessDefinitionService {
         processDefinitionDto.setDescription(processDefinition.getDescription());
         processDefinitionDto.setOwner(processDefinition.getOwner());
         processDefinitionDto.setTitle(processDefinition.getTitle());
-        processDefinitionDto.setDeleted(false);
+        processDefinitionDto.setDeleted(processDefinition.isDeleted());
         return processDefinitionDto;
     }
 
+    @Transactional
     public List<ProcessDefinitionDto> searchProcessDefinitions(ProcessDefinitionFilter filter) {
         List<ProcessDefinition> all = processDefinitionRepository.findAll(new Specification<ProcessDefinition>() {
             @Override
@@ -70,13 +72,14 @@ public class ProcessDefinitionService {
         return result;
     }
 
-    public ProcessDefinitionDto createProcessDefinition(ProcessDefinitionDto processDefinitionDto) throws DuplicateException {
+    @Transactional
+    public ProcessDefinitionDto createProcessDefinition(ProcessDefinitionDto processDefinitionDto) throws ConflictException {
         ProcessDefinition processDefinition = new ProcessDefinition();
         if (processDefinitionDto.getId() == null) {
             processDefinition.setId(UUID.randomUUID().toString());
         } else {
             if (processDefinitionRepository.existsById(processDefinitionDto.getId())) {
-                throw new DuplicateException("Duplicate title");
+                throw new ConflictException("Duplicate title");
             }
             processDefinition.setId(processDefinitionDto.getId());
         }
@@ -90,9 +93,10 @@ public class ProcessDefinitionService {
         return convertProcessDefinition(processDefinition);
     }
 
+    @Transactional
     public void removeProcessDefinition(String guid) throws DeprivedOfRightsException {
         Optional<ProcessDefinition> byId = processDefinitionRepository.findById(guid);
-        if (byId.isPresent()) {
+        if (!byId.isPresent()) {
             throw new NotFoundException("not found");
         }
         ProcessDefinition processDefinition = byId.get();

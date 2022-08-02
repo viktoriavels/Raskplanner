@@ -19,7 +19,7 @@ public class TaskInstance {
     private ProcessInstance processInstance;
     @ElementCollection
     @CollectionTable(name = "task_instance_candidates", joinColumns = @JoinColumn(name = "task_instance_id"))
-    @Column(name = "candidates")
+    @Column(name = "authority_name")
     private List<String> candidates;
     @Column(name = "creation_date")
     private Instant creationDate;

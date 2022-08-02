@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.vels.taskplanner.dto.GroupDto;
 import ru.vels.taskplanner.dto.GroupFilter;
 import ru.vels.taskplanner.dto.UserDto;
@@ -14,7 +15,7 @@ import ru.vels.taskplanner.dto.UserFilter;
 import ru.vels.taskplanner.entity.Group;
 import ru.vels.taskplanner.entity.User;
 import ru.vels.taskplanner.exception.DeprivedOfRightsException;
-import ru.vels.taskplanner.exception.DuplicateException;
+import ru.vels.taskplanner.exception.ConflictException;
 import ru.vels.taskplanner.repo.GroupsRepository;
 import ru.vels.taskplanner.repo.UsersRepository;
 
@@ -32,9 +33,10 @@ public class AuthService {
     @Autowired
     GroupsRepository groupsRepository;
 
-    public UserDto addUser(UserDto userDto) throws DuplicateException {
+    @Transactional
+    public UserDto addUser(UserDto userDto) throws ConflictException {
         if (usersRepository.findByUsername(userDto.getUsername()) != null) {
-            throw new DuplicateException("Duplicate username");
+            throw new ConflictException("Duplicate username");
         }
         User user = new User();
         user.setUsername(userDto.getUsername());
@@ -47,12 +49,13 @@ public class AuthService {
         return convertUser(user);
     }
 
-    public GroupDto createGroup(GroupDto groupDto) throws DuplicateException {
+    @Transactional
+    public GroupDto createGroup(GroupDto groupDto) throws ConflictException {
         org.springframework.security.core.userdetails.User currentUser
                 = (org.springframework.security.core.userdetails.User)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (groupsRepository.getByName(groupDto.getName()) != null) {
-            throw new DuplicateException("Duplicate group name");
+            throw new ConflictException("Duplicate group name");
         }
         Group group = new Group();
         group.setName(groupDto.getName());
@@ -64,6 +67,7 @@ public class AuthService {
         return convertGroup(group);
     }
 
+    @Transactional
     public void removeUser(String username) throws DeprivedOfRightsException {
         User user = usersRepository.findByUsername(username);
         org.springframework.security.core.userdetails.User currentUser
@@ -80,6 +84,7 @@ public class AuthService {
         }
     }
 
+    @Transactional
     public void removeGroup(String groupName) throws DeprivedOfRightsException {
         Group group = groupsRepository.getByName(groupName);
         org.springframework.security.core.userdetails.User currentUser
@@ -93,20 +98,21 @@ public class AuthService {
         }
     }
 
-
+    @Transactional
     public UserDto getUserInfo(String username) {
         User user = usersRepository.findByUsername(username);
         UserDto userDto = convertUser(user);
         return userDto;
     }
 
+    @Transactional
     public GroupDto getGroupInfo(String name) {
         Group group = groupsRepository.getByName(name);
         GroupDto groupDto = convertGroup(group);
         return groupDto;
     }
 
-
+    @Transactional
     public UserDto updateUserDto(UserDto userDto) throws DeprivedOfRightsException {
         User user = usersRepository.findByUsername(userDto.getUsername());
         org.springframework.security.core.userdetails.User currentUser
@@ -129,6 +135,7 @@ public class AuthService {
         throw new DeprivedOfRightsException("Нет прав для обновления профиля");
     }
 
+    @Transactional
     public GroupDto updateGroupDto(GroupDto groupDto) throws DeprivedOfRightsException {
         Group group = groupsRepository.getByName(groupDto.getName());
         org.springframework.security.core.userdetails.User currentUser
@@ -148,6 +155,7 @@ public class AuthService {
         throw new DeprivedOfRightsException("Нет прав для обновления группы");
     }
 
+    @Transactional
     public ArrayList<UserDto> searchUser(UserFilter userFilter) {
         List<User> all = usersRepository.findAll(new Specification<User>() {
             @Override
@@ -176,6 +184,7 @@ public class AuthService {
         return result;
     }
 
+    @Transactional
     public ArrayList<GroupDto> searchGroup(GroupFilter groupFilter) {
         List<Group> all = groupsRepository.findAll(new Specification<Group>() {
             @Override
@@ -200,6 +209,7 @@ public class AuthService {
         return result;
     }
 
+    @Transactional
     public void addUserToGroup(String username, String groupName) throws DeprivedOfRightsException {
         User user = usersRepository.findByUsername(username);
         org.springframework.security.core.userdetails.User currentUser
@@ -217,6 +227,7 @@ public class AuthService {
         }
     }
 
+    @Transactional
     public void removeUserFromGroup(String username, String groupName) throws DeprivedOfRightsException {
         User user = usersRepository.findByUsername(username);
         org.springframework.security.core.userdetails.User currentUser
@@ -239,14 +250,16 @@ public class AuthService {
         groupDto.setDeleted(group.getDeleted());
         groupDto.setId(group.getId());
         ArrayList<UserDto> users = new ArrayList<>();
-        for (User g : group.getUsers()) {
-            UserDto userDto = new UserDto();
-            userDto.setUsername(g.getUsername());
-            userDto.setPatronymic(g.getPatronymic());
-            userDto.setFirstName(g.getFirstName());
-            userDto.setLastName(g.getLastName());
-            userDto.setDeleted(g.getDeleted());
-            users.add(userDto);
+        if (group.getUsers() != null) {
+            for (User g : group.getUsers()) {
+                UserDto userDto = new UserDto();
+                userDto.setUsername(g.getUsername());
+                userDto.setPatronymic(g.getPatronymic());
+                userDto.setFirstName(g.getFirstName());
+                userDto.setLastName(g.getLastName());
+                userDto.setDeleted(g.getDeleted());
+                users.add(userDto);
+            }
         }
         groupDto.setUsers(users);
         return groupDto;
@@ -259,17 +272,17 @@ public class AuthService {
         userDto.setFirstName(user.getFirstName());
         userDto.setPatronymic(user.getPatronymic());
         userDto.setDeleted(user.getDeleted());
-
         ArrayList<GroupDto> group = new ArrayList<>();
-
-        for (Group g : user.getGroups()) {
-            GroupDto groupDto = new GroupDto();
-            groupDto.setName(g.getName());
-            groupDto.setOwner(g.getOwner());
-            groupDto.setTitle(g.getTitle());
-            groupDto.setDeleted(g.getDeleted());
-            groupDto.setId(g.getId());
-            group.add(groupDto);
+        if (user.getGroups() != null) {
+            for (Group g : user.getGroups()) {
+                GroupDto groupDto = new GroupDto();
+                groupDto.setName(g.getName());
+                groupDto.setOwner(g.getOwner());
+                groupDto.setTitle(g.getTitle());
+                groupDto.setDeleted(g.getDeleted());
+                groupDto.setId(g.getId());
+                group.add(groupDto);
+            }
         }
         userDto.setGroups(group);
         return userDto;

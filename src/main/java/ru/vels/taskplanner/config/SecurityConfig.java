@@ -16,9 +16,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf().disable()
-                .authorizeRequests()
-                    .antMatchers("/user/register").permitAll()
-                    .anyRequest().authenticated()
+                .antMatcher("/**")
+                    .authorizeRequests()
+                        .antMatchers("/user/register").permitAll()
+                        .anyRequest().authenticated()
                 .and()
                     .httpBasic(Customizer.withDefaults())
                 .build();

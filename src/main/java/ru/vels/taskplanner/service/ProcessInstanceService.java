@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.vels.taskplanner.dto.ProcessInstanceFilter;
 import ru.vels.taskplanner.dto.RunProcessInstanceDto;
 import ru.vels.taskplanner.dto.ProcessInstanceDto;
@@ -42,10 +43,11 @@ public class ProcessInstanceService {
     @Autowired
     ProcessDefinitionRepository processDefinitionRepository;
 
+    @Transactional
     public ProcessInstanceDto startProcess(RunProcessInstanceDto runProcessInstanceDto) {
 
         Optional<ProcessDefinition> byId = processDefinitionRepository.findById(runProcessInstanceDto.getDefinitionId());
-        if (byId.isPresent()) {
+        if (!byId.isPresent()) {
             throw new NotFoundException("not found");
         }
         ProcessDefinition processDefinition = byId.get();
@@ -78,6 +80,7 @@ public class ProcessInstanceService {
         return processInstanceDto;
     }
 
+    @Transactional
     public void cancelProcessInstance(long id) throws DeprivedOfRightsException {
         org.springframework.security.core.userdetails.User currentUser
                 = (org.springframework.security.core.userdetails.User)
@@ -88,7 +91,6 @@ public class ProcessInstanceService {
         }
         ProcessInstance processInstance = byId.get();
         if (isAdmin() || processInstance.getOwner().equals(currentUser.getUsername())) {
-
             for (TaskInstance taskInstance : processInstance.getTaskInstanceList()) {
                 taskInstanceService.cancelTask(taskInstance.getId());
             }
@@ -99,6 +101,7 @@ public class ProcessInstanceService {
         }
     }
 
+    @Transactional
     public List<ProcessInstanceDto> searchProcessInstance(ProcessInstanceFilter filter) {
         List<ProcessInstance> all = processInstancesRepository.findAll(new Specification<ProcessInstance>() {
             @Override

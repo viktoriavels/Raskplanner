@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.vels.taskplanner.dto.GroupDto;
 import ru.vels.taskplanner.dto.GroupFilter;
 import ru.vels.taskplanner.exception.DeprivedOfRightsException;
-import ru.vels.taskplanner.exception.DuplicateException;
+import ru.vels.taskplanner.exception.ConflictException;
 import ru.vels.taskplanner.service.AuthService;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class GroupController {
     }
 
     @PostMapping("/group")
-    public GroupDto createGroup(@RequestBody GroupDto groupDto) throws DuplicateException {
+    public GroupDto createGroup(@RequestBody GroupDto groupDto) throws ConflictException {
         return authService.createGroup(groupDto);
     }
 
@@ -47,8 +47,8 @@ public class GroupController {
     }
 
     @GetMapping(path = "/group/{groupName}", produces = "application/json")
-    public GroupDto getGroupInfo(@PathVariable String name) {
-        return authService.getGroupInfo(name);
+    public GroupDto getGroupInfo(@PathVariable String groupName) {
+        return authService.getGroupInfo(groupName);
     }
 
     @PatchMapping(path = "/group/",
@@ -63,8 +63,8 @@ public class GroupController {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity<Void> handleException(DuplicateException e) {
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Void> handleException(ConflictException e) {
         return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 }

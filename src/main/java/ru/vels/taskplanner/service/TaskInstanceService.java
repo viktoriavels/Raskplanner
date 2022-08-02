@@ -5,6 +5,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.vels.taskplanner.dto.TaskInstanceDto;
 import ru.vels.taskplanner.dto.TaskInstanceFilter;
 import ru.vels.taskplanner.dto.definition.DefinitionActivityType;
@@ -13,6 +14,7 @@ import ru.vels.taskplanner.dto.definition.DefinitionUserTask;
 import ru.vels.taskplanner.entity.ProcessInstance;
 import ru.vels.taskplanner.entity.TaskInstance;
 import ru.vels.taskplanner.exception.DeprivedOfRightsException;
+import ru.vels.taskplanner.exception.ConflictException;
 import ru.vels.taskplanner.exception.NotFoundException;
 import ru.vels.taskplanner.process.ProcessEvent;
 import ru.vels.taskplanner.process.ProcessEventType;
@@ -31,6 +33,7 @@ import java.util.Optional;
 
 @Service
 public class TaskInstanceService {
+
     @Autowired
     TaskInstancesRepository taskInstancesRepository;
     @Autowired
@@ -40,17 +43,23 @@ public class TaskInstanceService {
     @Autowired
     ProcessInstancesRepository processInstancesRepository;
 
+    @Transactional
     public void cancelTask(Long id) {
         Optional<TaskInstance> byId = taskInstancesRepository.findById(id);
         if (!byId.isPresent()) {
             throw new NotFoundException("not found");
         }
         TaskInstance taskInstance = byId.get();
+        if (taskInstance.getCompletionDate() != null) {
+            throw new ConflictException("task already completed");
+        }
+
         taskInstance.setDecision("RESETED");
         taskInstance.setCompletionDate(Instant.now());
         taskInstancesRepository.save(taskInstance);
     }
 
+    @Transactional
     public void startTask(long processInstanceId, String taskDefinitionId) {
         Optional<ProcessInstance> byId = processInstancesRepository.findById(processInstanceId);
         if (!byId.isPresent()) {
@@ -91,6 +100,7 @@ public class TaskInstanceService {
         processListenerManager.notify(processEvent);
     }
 
+    @Transactional
     public void completeTask(long id, String decision) throws DeprivedOfRightsException {
         org.springframework.security.core.userdetails.User currentUser
                 = (org.springframework.security.core.userdetails.User)
@@ -101,6 +111,10 @@ public class TaskInstanceService {
             throw new NotFoundException("not found");
         }
         TaskInstance taskInstance = byId.get();
+        if (taskInstance.getCompletionDate() != null) {
+            throw new ConflictException("task already completed");
+        }
+
         if(taskInstance.getCandidates().contains(currentUser.getUsername())||isAdmin()){
             taskInstance.setDecision(decision);
             taskInstance.setCompletionDate(Instant.now());
@@ -116,9 +130,9 @@ public class TaskInstanceService {
         }else {
             throw  new DeprivedOfRightsException("DeprivedOfRights");
         }
-
     }
 
+    @Transactional
     public List<TaskInstanceDto> searchTasks(TaskInstanceFilter filter) {
         List<TaskInstance> all = taskInstancesRepository.findAll(new Specification<TaskInstance>() {
             @Override
@@ -185,6 +199,7 @@ public class TaskInstanceService {
         taskInstanceDto.setDecision(taskInstance.getDecision());
         return taskInstanceDto;
     }
+
     private boolean isAdmin() {
         org.springframework.security.core.userdetails.User currentUser
                 = (org.springframework.security.core.userdetails.User)

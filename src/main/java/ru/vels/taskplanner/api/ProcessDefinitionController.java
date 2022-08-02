@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.vels.taskplanner.dto.ProcessDefinitionDto;
 import ru.vels.taskplanner.dto.ProcessDefinitionFilter;
 import ru.vels.taskplanner.exception.DeprivedOfRightsException;
-import ru.vels.taskplanner.exception.DuplicateException;
+import ru.vels.taskplanner.exception.ConflictException;
+import ru.vels.taskplanner.exception.NotFoundException;
 import ru.vels.taskplanner.service.ProcessDefinitionService;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class ProcessDefinitionController {
     }
 
     @PostMapping("/process-definition/create")
-    public ProcessDefinitionDto createProcessDefinition(@RequestBody ProcessDefinitionDto processDefinitionDto) throws DuplicateException {
+    public ProcessDefinitionDto createProcessDefinition(@RequestBody ProcessDefinitionDto processDefinitionDto) throws ConflictException {
         return processDefinitionService.createProcessDefinition(processDefinitionDto);
     }
 
@@ -37,9 +38,9 @@ public class ProcessDefinitionController {
         return processDefinitionService.searchProcessDefinitions(filter);
     }
 
-    @GetMapping()
-    public ProcessDefinitionDto getProcessDefinitionInfo(@RequestBody String title) {
-        return processDefinitionService.getProcessDefinitionInfo(title);
+    @GetMapping("/process-definition/{guid}")
+    public ProcessDefinitionDto getProcessDefinitionInfo(@RequestBody String guid) {
+        return processDefinitionService.getProcessDefinitionInfo(guid);
     }
 
     @ExceptionHandler(DeprivedOfRightsException.class)
@@ -47,8 +48,13 @@ public class ProcessDefinitionController {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity<Void> handleException(DuplicateException e) {
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Void> handleException(NotFoundException e) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Void> handleException(ConflictException e) {
         return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 }

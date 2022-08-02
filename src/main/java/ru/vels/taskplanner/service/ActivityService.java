@@ -2,6 +2,7 @@ package ru.vels.taskplanner.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.vels.taskplanner.dto.definition.*;
 import ru.vels.taskplanner.entity.ProcessInstance;
 import ru.vels.taskplanner.exception.ActivityException;
@@ -21,6 +22,7 @@ public class ActivityService {
     @Autowired
     TaskInstanceService taskInstanceService;
 
+    @Transactional
     public void startProcess(long processInstanceId) throws ActivityException {
         Optional<ProcessInstance> byId = processInstancesRepository.findById(processInstanceId);
         if (!byId.isPresent()) {
@@ -33,6 +35,7 @@ public class ActivityService {
         taskInstanceService.startTask(processInstanceId, definitionActivity.getId());
     }
 
+    @Transactional
     public void stopActivity(long processInstanceId, String activityDefinitionId, String decision) throws ActivityException {
         Optional<ProcessInstance> byId = processInstancesRepository.findById(processInstanceId);
         if (!byId.isPresent()) {
